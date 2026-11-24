@@ -24,6 +24,20 @@ import {
 import type { DriveInfo, QuickAccessItem, UiStyle } from '../types';
 import { formatBytes, getPathBasename } from '../utils/format';
 import { FluentFolderIcon } from './FileIcon';
+import {
+  Win11DesktopIcon,
+  Win11DocumentsIcon,
+  Win11DownloadsIcon,
+  Win11DriveIcon,
+  Win11GalleryIcon,
+  Win11HomeIcon,
+  Win11MusicIcon,
+  Win11NetworkIcon,
+  Win11PicturesIcon,
+  Win11RecycleBinIcon,
+  Win11ThisPcIcon,
+  Win11VideosIcon,
+} from './Win11Icons';
 
 interface SidebarProps {
   uiStyle: UiStyle;
@@ -42,7 +56,25 @@ interface SidebarProps {
   onOpenSpecial: (target: 'recycle-bin' | 'network') => void;
 }
 
-function renderQuickIcon(icon: string) {
+function renderQuickIcon(icon: string, classic: boolean) {
+  if (classic) {
+    switch (icon) {
+      case 'monitor':
+        return <Win11DesktopIcon size={15} />;
+      case 'download':
+        return <Win11DownloadsIcon size={15} />;
+      case 'file-text':
+        return <Win11DocumentsIcon size={15} />;
+      case 'image':
+        return <Win11PicturesIcon size={15} />;
+      case 'music':
+        return <Win11MusicIcon size={15} />;
+      case 'film':
+        return <Win11VideosIcon size={15} />;
+      default:
+        return <FluentFolderIcon size={15} />;
+    }
+  }
   switch (icon) {
     case 'monitor':
       return <Monitor size={15} style={{ color: '#60a5fa' }} />;
@@ -152,7 +184,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onClick={() => onNavigate('velo://home')}
         >
           <span className="sidebar-icon">
-            <Home size={15} style={{ color: '#93c5fd' }} />
+            {uiStyle === 'classic-explorer' ? (
+              <Win11HomeIcon size={15} />
+            ) : (
+              <Home size={15} style={{ color: '#93c5fd' }} />
+            )}
           </span>
           <span className="sidebar-label">Home</span>
         </button>
@@ -161,7 +197,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onClick={() => onNavigate('velo://gallery')}
         >
           <span className="sidebar-icon">
-            <Images size={15} style={{ color: '#60a5fa' }} />
+            {uiStyle === 'classic-explorer' ? (
+              <Win11GalleryIcon size={15} />
+            ) : (
+              <Images size={15} style={{ color: '#60a5fa' }} />
+            )}
           </span>
           <span className="sidebar-label">Gallery</span>
         </button>
@@ -189,7 +229,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               title={item.path}
               {...makeDropHandlers(item.path)}
             >
-              <span className="sidebar-icon">{renderQuickIcon(item.icon)}</span>
+              <span className="sidebar-icon">
+                {renderQuickIcon(item.icon, uiStyle === 'classic-explorer')}
+              </span>
               <span className="sidebar-label">{item.name}</span>
               <Pin size={10} className="sidebar-pin-mark" />
             </button>
@@ -234,7 +276,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           title="Open Windows Recycle Bin"
         >
           <span className="sidebar-icon">
-            <Trash2 size={15} style={{ color: '#a1a1aa' }} />
+            {uiStyle === 'classic-explorer' ? (
+              <Win11RecycleBinIcon size={15} />
+            ) : (
+              <Trash2 size={15} style={{ color: '#a1a1aa' }} />
+            )}
           </span>
           <span className="sidebar-label">Recycle Bin</span>
         </button>
@@ -396,7 +442,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {thisPcExpanded ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
           </button>
           <span className="sidebar-icon">
-            <Monitor size={15} style={{ color: '#93c5fd' }} />
+            {uiStyle === 'classic-explorer' ? (
+              <Win11ThisPcIcon size={15} />
+            ) : (
+              <Monitor size={15} style={{ color: '#93c5fd' }} />
+            )}
           </span>
           <span className="sidebar-label">This PC</span>
         </div>
@@ -407,6 +457,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             const isDragOver = dragOverPath === drive.mountPoint;
             const used = drive.totalSpace - drive.availableSpace;
             const pct = drive.totalSpace > 0 ? Math.min(100, (used / drive.totalSpace) * 100) : 0;
+            const isOsDrive = drive.mountPoint.toUpperCase().startsWith('C:');
             return (
               <button
                 key={drive.mountPoint}
@@ -421,7 +472,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               >
                 <div className="drive-top">
                   <span className="sidebar-icon">
-                    {drive.isRemovable ? (
+                    {uiStyle === 'classic-explorer' ? (
+                      <Win11DriveIcon size={15} isOsDrive={isOsDrive} />
+                    ) : drive.isRemovable ? (
                       <Usb size={14} style={{ color: '#a1a1aa' }} />
                     ) : (
                       <HardDrive size={14} style={{ color: '#a1a1aa' }} />
@@ -442,12 +495,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
           })}
 
         <button
-          className="sidebar-item"
+          className={`sidebar-item ${uiStyle === 'classic-explorer' ? 'tree-parent' : ''}`}
           onClick={() => onOpenSpecial('network')}
           title="Open Network in Windows Explorer"
         >
+          {uiStyle === 'classic-explorer' && (
+            <span className="tree-chevron">
+              <ChevronRight size={13} />
+            </span>
+          )}
           <span className="sidebar-icon">
-            <Globe size={15} style={{ color: '#60a5fa' }} />
+            {uiStyle === 'classic-explorer' ? (
+              <Win11NetworkIcon size={15} />
+            ) : (
+              <Globe size={15} style={{ color: '#60a5fa' }} />
+            )}
           </span>
           <span className="sidebar-label">Network</span>
         </button>

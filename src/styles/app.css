@@ -3581,13 +3581,13 @@ button {
 .app-shell.style-classic-explorer .search-box {
   height: 32px;
   border-radius: 4px;
-  background: rgba(0, 0, 0, 0.24);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .app-shell.style-classic-explorer .address-bar:hover {
-  background: rgba(0, 0, 0, 0.32);
-  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.13);
 }
 
 .app-shell.style-classic-explorer .address-bar.editing,
@@ -3707,3 +3707,54 @@ button {
   color: rgba(255, 255, 255, 0.72);
 }
 
+
+/* Classic Windows 11 This PC — Devices and drives authentic tile & blue bar */
+.classic-section-hdr {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.app-shell.style-classic-explorer .special-drive-card {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  padding: 8px 10px;
+  gap: 10px;
+}
+
+.app-shell.style-classic-explorer .special-drive-card:hover {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.app-shell.style-classic-explorer .special-drive-card:focus-visible {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.72);
+  outline: none;
+}
+
+.app-shell.style-classic-explorer .drive-bar-track.lg {
+  height: 12px;
+  border-radius: 1.5px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.app-shell.style-classic-explorer .drive-bar-fill {
+  background: #26a0da;
+  border-radius: 1px;
+}
+
+.app-shell.style-classic-explorer .drive-bar-fill.warn {
+  background: #da2626;
+}
+
+.app-shell.style-classic-explorer [data-settings-trigger] {
+  opacity: 0.48;
+}
+.app-shell.style-classic-explorer [data-settings-trigger]:hover {
+  opacity: 1;
+}

@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { HardDrive, Pin, Usb } from 'lucide-react';
-import type { DriveInfo, FileEntry, NavDirection, QuickAccessItem } from '../types';
+import { ChevronDown, HardDrive, Pin, Usb } from 'lucide-react';
+import type { DriveInfo, FileEntry, NavDirection, QuickAccessItem, UiStyle } from '../types';
 import { api } from '../api';
 import { formatBytes, getPathBasename } from '../utils/format';
 import { FluentFolderIcon } from './FileIcon';
+import { Win11DriveIcon } from './Win11Icons';
 
 interface SpecialViewsProps {
   mode: 'home' | 'this-pc' | 'gallery';
+  uiStyle: UiStyle;
   quickAccess: QuickAccessItem[];
   pinnedPaths: string[];
   drives: DriveInfo[];
@@ -19,6 +21,7 @@ interface SpecialViewsProps {
 
 export const SpecialViews: React.FC<SpecialViewsProps> = ({
   mode,
+  uiStyle,
   quickAccess,
   pinnedPaths,
   drives,
@@ -128,11 +131,21 @@ export const SpecialViews: React.FC<SpecialViewsProps> = ({
             </>
           )}
 
-          <div className="special-section-title">Devices and drives ({drives.length})</div>
+          <div className="special-section-title">
+            {uiStyle === 'classic-explorer' ? (
+              <span className="classic-section-hdr">
+                <ChevronDown size={13} />
+                <span>Devices and drives</span>
+              </span>
+            ) : (
+              `Devices and drives (${drives.length})`
+            )}
+          </div>
           <div className="special-drive-grid">
             {drives.map((d) => {
               const used = Math.max(0, d.totalSpace - d.availableSpace);
               const pct = d.totalSpace > 0 ? Math.min(100, (used / d.totalSpace) * 100) : 0;
+              const isOsDrive = d.mountPoint.toUpperCase().startsWith('C:');
               return (
                 <button
                   key={d.mountPoint}
@@ -140,7 +153,13 @@ export const SpecialViews: React.FC<SpecialViewsProps> = ({
                   onClick={() => onNavigate(d.mountPoint, 'in')}
                 >
                   <div className="special-drive-icon">
-                    {d.isRemovable ? <Usb size={30} /> : <HardDrive size={30} />}
+                    {uiStyle === 'classic-explorer' ? (
+                      <Win11DriveIcon size={40} isOsDrive={isOsDrive} />
+                    ) : d.isRemovable ? (
+                      <Usb size={30} />
+                    ) : (
+                      <HardDrive size={30} />
+                    )}
                   </div>
                   <div className="special-drive-body">
                     <div className="special-card-name">{d.name}</div>

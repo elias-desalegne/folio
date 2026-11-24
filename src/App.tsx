@@ -1267,6 +1267,7 @@ export const App: React.FC = () => {
       return (
         <SpecialViews
           mode="home"
+          uiStyle={userSettings.uiStyle}
           quickAccess={quickAccess}
           pinnedPaths={pinnedPaths}
           drives={drives}
@@ -1282,6 +1283,7 @@ export const App: React.FC = () => {
       return (
         <SpecialViews
           mode="this-pc"
+          uiStyle={userSettings.uiStyle}
           quickAccess={quickAccess}
           pinnedPaths={pinnedPaths}
           drives={drives}
@@ -1297,6 +1299,7 @@ export const App: React.FC = () => {
       return (
         <SpecialViews
           mode="gallery"
+          uiStyle={userSettings.uiStyle}
           quickAccess={quickAccess}
           pinnedPaths={pinnedPaths}
           drives={drives}
@@ -1593,8 +1596,20 @@ export const App: React.FC = () => {
 
       <StatusBar
         uiStyle={userSettings.uiStyle}
-        totalCount={activeEntries.length}
-        visibleCount={activeVisible.length}
+        totalCount={
+          currentTab.path === 'velo://this-pc'
+            ? drives.length
+            : currentTab.path === 'velo://home'
+            ? quickAccess.filter((q) => q.name !== 'Home').length + drives.length
+            : activeEntries.length
+        }
+        visibleCount={
+          currentTab.path === 'velo://this-pc'
+            ? drives.length
+            : currentTab.path === 'velo://home'
+            ? quickAccess.filter((q) => q.name !== 'Home').length + drives.length
+            : activeVisible.length
+        }
         selectedCount={activeSelected.size}
         selectedSize={selectedTotalSize}
         clipboard={clipboard}

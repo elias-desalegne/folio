@@ -4,6 +4,7 @@ import { Copy, Minus, Plus, Square, X } from 'lucide-react';
 import type { TabState } from '../types';
 import { getPathBasename } from '../utils/format';
 import { FluentFolderIcon } from './FileIcon';
+import { Win11GalleryIcon, Win11HomeIcon, Win11ThisPcIcon } from './Win11Icons';
 
 interface TitleBarProps {
   tabs: TabState[];
@@ -56,7 +57,15 @@ export const TitleBar: React.FC<TitleBarProps> = ({
               }}
               title={tab.path}
             >
-              <FluentFolderIcon size={14} />
+              {tab.path === 'velo://this-pc' ? (
+                <Win11ThisPcIcon size={14} />
+              ) : tab.path === 'velo://home' ? (
+                <Win11HomeIcon size={14} />
+              ) : tab.path === 'velo://gallery' ? (
+                <Win11GalleryIcon size={14} />
+              ) : (
+                <FluentFolderIcon size={14} />
+              )}
               <span className="tab-label">{title}</span>
               {tabs.length > 1 && (
                 <button
