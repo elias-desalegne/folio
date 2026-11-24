@@ -1,9 +1,10 @@
 import React from 'react';
 import { LayoutGrid, List } from 'lucide-react';
-import type { ClipboardState, ViewMode } from '../types';
+import type { ClipboardState, UiStyle, ViewMode } from '../types';
 import { formatBytes } from '../utils/format';
 
 interface StatusBarProps {
+  uiStyle: UiStyle;
   totalCount: number;
   visibleCount: number;
   selectedCount: number;
@@ -15,6 +16,7 @@ interface StatusBarProps {
 }
 
 export const StatusBar: React.FC<StatusBarProps> = ({
+  uiStyle,
   totalCount,
   visibleCount,
   selectedCount,
@@ -44,7 +46,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({
           </>
         )}
         {recursiveSearch && <span className="status-badge">Deep Search</span>}
-        {clipboard && (
+        {clipboard && uiStyle !== 'classic-explorer' && (
           <>
             <span className="status-pipe">|</span>
             <span className="status-clip">
@@ -55,7 +57,9 @@ export const StatusBar: React.FC<StatusBarProps> = ({
       </div>
 
       <div className="status-right">
-        <span className="status-hint">Space: QuickLook · Ctrl+K: Commands</span>
+        {uiStyle !== 'classic-explorer' && (
+          <span className="status-hint">Space: QuickLook · Ctrl+K: Commands</span>
+        )}
         <div className="status-view-btns">
           <button
             className={`status-view-btn ${!isGrid ? 'active' : ''}`}

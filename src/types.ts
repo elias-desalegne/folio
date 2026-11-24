@@ -105,7 +105,10 @@ export interface ExecutableInfo {
 
 export type FileTagColor = 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple';
 
+export type UiStyle = 'folio' | 'classic-explorer';
+
 export interface UserSettings {
+  uiStyle: UiStyle;
   glassOpacity: number; // 0.08 to 0.72
   showExtensions: boolean;
   doubleClickEmptyGoesBack: boolean;

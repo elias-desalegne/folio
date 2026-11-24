@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Check, FolderCog, SlidersHorizontal, Sparkles, X } from 'lucide-react';
-import type { UserSettings, WindowEffect } from '../types';
+import { Check, FolderCog, Layout, SlidersHorizontal, Sparkles, X } from 'lucide-react';
+import type { UiStyle, UserSettings, WindowEffect } from '../types';
 import { api } from '../api';
 
 interface SettingsPopoverProps {
@@ -14,6 +14,19 @@ interface SettingsPopoverProps {
   onUpdateSettings: (patch: Partial<UserSettings>) => void;
   onToast: (msg: string) => void;
 }
+
+const UI_STYLES: { id: UiStyle; label: string; desc: string }[] = [
+  {
+    id: 'folio',
+    label: 'Folio Modern',
+    desc: 'Cool frosted glass, category pills & quick tools',
+  },
+  {
+    id: 'classic-explorer',
+    label: 'Windows 11 Explorer',
+    desc: 'Exact native UI & gold folders (matches browser dialogs)',
+  },
+];
 
 const EFFECTS: { id: WindowEffect; label: string; desc: string }[] = [
   { id: 'acrylic', label: 'Acrylic', desc: 'Frosted obsidian glass' },
@@ -92,6 +105,33 @@ export const SettingsPopover: React.FC<SettingsPopoverProps> = ({
           <X size={14} />
         </button>
       </div>
+
+      <div className="settings-section">
+        <div className="settings-label">
+          <Layout size={12} />
+          <span>Interface Style</span>
+        </div>
+        <div className="settings-style-grid">
+          {UI_STYLES.map((st) => {
+            const active = settings.uiStyle === st.id;
+            return (
+              <button
+                key={st.id}
+                className={`effect-card ${active ? 'active' : ''}`}
+                onClick={() => onUpdateSettings({ uiStyle: st.id })}
+              >
+                <div className="effect-card-top">
+                  <span>{st.label}</span>
+                  {active && <Check size={12} />}
+                </div>
+                <span className="effect-card-desc">{st.desc}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="settings-divider" />
 
       <div className="settings-section">
         <div className="settings-label">

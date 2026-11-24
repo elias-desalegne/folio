@@ -18,14 +18,16 @@ import {
   PanelRight,
   PlusCircle,
   Scissors,
+  Share,
   SlidersHorizontal,
   Sparkles,
   Terminal,
   Trash2,
 } from 'lucide-react';
-import type { GroupBy, SortDir, SortField, ViewMode, WindowEffect } from '../types';
+import type { GroupBy, SortDir, SortField, UiStyle, ViewMode, WindowEffect } from '../types';
 
 interface CommandBarProps {
+  uiStyle: UiStyle;
   hasSelection: boolean;
   singleSelection: boolean;
   canPaste: boolean;
@@ -62,11 +64,13 @@ interface CommandBarProps {
   onOpenTerminal: () => void;
   onOpenProperties: () => void;
   onOpenTidy: () => void;
+  onToggleUiStyle: () => void;
 }
 
 type OpenMenu = 'new' | 'sort' | 'view' | 'more' | null;
 
 export const CommandBar: React.FC<CommandBarProps> = ({
+  uiStyle,
   hasSelection,
   singleSelection,
   canPaste,
@@ -103,6 +107,7 @@ export const CommandBar: React.FC<CommandBarProps> = ({
   onOpenTerminal,
   onOpenProperties,
   onOpenTidy,
+  onToggleUiStyle,
 }) => {
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
   const barRef = useRef<HTMLDivElement>(null);
@@ -201,9 +206,9 @@ export const CommandBar: React.FC<CommandBarProps> = ({
           className="cmd-btn"
           disabled={!hasSelection}
           onClick={onCopyPath}
-          title="Copy path"
+          title={uiStyle === 'classic-explorer' ? 'Share / Copy path' : 'Copy path'}
         >
-          <Link2 size={15} />
+          {uiStyle === 'classic-explorer' ? <Share size={15} /> : <Link2 size={15} />}
         </button>
         <button
           className="cmd-btn"
@@ -420,6 +425,31 @@ export const CommandBar: React.FC<CommandBarProps> = ({
                   </button>
                 </>
               )}
+              <button
+                className="cmd-menu-item"
+                onClick={() => {
+                  setOpenMenu(null);
+                  onToggleUiStyle();
+                }}
+              >
+                <SlidersHorizontal size={13} />
+                <span>
+                  {uiStyle === 'classic-explorer'
+                    ? 'Switch to Folio Modern UI'
+                    : 'Switch to Windows 11 Explorer UI'}
+                </span>
+              </button>
+              <button
+                className="cmd-menu-item"
+                data-settings-trigger="true"
+                onClick={() => {
+                  setOpenMenu(null);
+                  onToggleSettings();
+                }}
+              >
+                <SlidersHorizontal size={13} />
+                <span>Appearance &amp; Settings...</span>
+              </button>
               {singleSelection && (
                 <button
                   className="cmd-menu-item"
@@ -439,23 +469,27 @@ export const CommandBar: React.FC<CommandBarProps> = ({
       </div>
 
       <div className="cmd-right">
-        <button
-          className="cmd-btn labeled"
-          disabled={!singleSelection}
-          onClick={onQuickLookSelected}
-          title="QuickLook selected item (Space)"
-        >
-          <Eye size={14} />
-          <span>QuickLook</span>
-        </button>
-        <button
-          className={`cmd-btn labeled ${splitPane ? 'active' : ''}`}
-          onClick={onToggleSplit}
-          title="Toggle split pane (Ctrl+\)"
-        >
-          <Columns2 size={14} />
-          <span>Split</span>
-        </button>
+        {uiStyle !== 'classic-explorer' && (
+          <>
+            <button
+              className="cmd-btn labeled"
+              disabled={!singleSelection}
+              onClick={onQuickLookSelected}
+              title="QuickLook selected item (Space)"
+            >
+              <Eye size={14} />
+              <span>QuickLook</span>
+            </button>
+            <button
+              className={`cmd-btn labeled ${splitPane ? 'active' : ''}`}
+              onClick={onToggleSplit}
+              title="Toggle split pane (Ctrl+\)"
+            >
+              <Columns2 size={14} />
+              <span>Split</span>
+            </button>
+          </>
+        )}
         <button
           className={`cmd-btn labeled ${previewPane ? 'active' : ''}`}
           onClick={onTogglePreview}
@@ -468,7 +502,7 @@ export const CommandBar: React.FC<CommandBarProps> = ({
           className={`cmd-btn ${settingsOpen ? 'active' : ''}`}
           data-settings-trigger="true"
           onClick={onToggleSettings}
-          title="Appearance & Preferences"
+          title="Appearance & Interface Style"
         >
           <SlidersHorizontal size={14} />
         </button>

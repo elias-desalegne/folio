@@ -46,7 +46,7 @@ import {
   isVideoPreviewable,
   isZipInspectable,
 } from '../utils/format';
-import { FileIcon } from './FileIcon';
+import { FileIcon, FluentFolderIcon } from './FileIcon';
 
 interface QuickLookModalProps {
   entry: FileEntry | null;
@@ -877,7 +877,7 @@ export const QuickLookModal: React.FC<QuickLookModalProps> = ({
           {/* Folder Preview */}
           {!loading && folderData && (
             <div className="ql-folder-wrap">
-              <FolderOpen size={60} className="ql-folder-icon" />
+              <FluentFolderIcon size={64} />
               <div className="ql-folder-stats">
                 <span>{folderData.dirCount} folders</span>
                 <span>·</span>

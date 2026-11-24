@@ -21,11 +21,12 @@ import {
   Trash2,
   Usb,
 } from 'lucide-react';
-import type { DriveInfo, QuickAccessItem } from '../types';
+import type { DriveInfo, QuickAccessItem, UiStyle } from '../types';
 import { formatBytes, getPathBasename } from '../utils/format';
 import { FluentFolderIcon } from './FileIcon';
 
 interface SidebarProps {
+  uiStyle: UiStyle;
   currentPath: string;
   quickAccess: QuickAccessItem[];
   pinnedPaths: string[];
@@ -61,6 +62,7 @@ function renderQuickIcon(icon: string) {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
+  uiStyle,
   currentPath,
   quickAccess,
   pinnedPaths,
@@ -126,6 +128,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const standardFolders = quickAccess.filter((q) => q.name !== 'Home');
+  const standardFolderNorms = new Set(standardFolders.map((q) => normalize(q.path)));
+  const extraPinnedPaths = pinnedPaths.filter((p) => !standardFolderNorms.has(normalize(p)));
+
+  const pinZoneDropHandlers = {
+    onDragOver: (e: React.DragEvent) => {
+      if (e.dataTransfer.types.includes('application/x-velo-folder')) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'link';
+        setPinZoneDragOver(true);
+      }
+    },
+    onDragLeave: () => setPinZoneDragOver(false),
+    onDrop: handlePinZoneDrop,
+  };
 
   return (
     <aside className="sidebar">
@@ -153,8 +169,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       <div className="sidebar-sep" />
 
-      {/* Standard Quick Access folders + Recycle Bin */}
-      <div className="sidebar-section">
+      {/* Standard Quick Access folders + Pinned folders (in Classic Explorer mode) + Recycle Bin */}
+      <div
+        className={`sidebar-section ${
+          uiStyle === 'classic-explorer' && pinZoneDragOver ? 'pin-drop-active' : ''
+        }`}
+        {...(uiStyle === 'classic-explorer' ? pinZoneDropHandlers : {})}
+      >
         {standardFolders.map((item) => {
           const isActive = normalize(item.path) === activeNorm;
           const isDragOver = dragOverPath === item.path;
@@ -175,6 +196,38 @@ export const Sidebar: React.FC<SidebarProps> = ({
           );
         })}
 
+        {uiStyle === 'classic-explorer' &&
+          extraPinnedPaths.map((p) => {
+            const isActive = normalize(p) === activeNorm;
+            const isDragOver = dragOverPath === p;
+            return (
+              <div
+                key={`pin-${normalize(p)}`}
+                className={`sidebar-item pinned ${isActive ? 'active' : ''} ${
+                  isDragOver ? 'drop-target' : ''
+                }`}
+                onClick={() => onNavigate(p)}
+                title={p}
+                {...makeDropHandlers(p)}
+              >
+                <span className="sidebar-icon">
+                  <FluentFolderIcon size={15} />
+                </span>
+                <span className="sidebar-label">{getPathBasename(p)}</span>
+                <span
+                  className="sidebar-pin-mark"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onUnpin(p);
+                  }}
+                  title="Unpin from Quick access"
+                >
+                  <Pin size={10} />
+                </span>
+              </div>
+            );
+          })}
+
         <button
           className="sidebar-item"
           onClick={() => onOpenSpecial('recycle-bin')}
@@ -187,144 +240,140 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </button>
       </div>
 
-      <div className="sidebar-sep" />
-
-      {/* Dedicated Pinned Folders section with drag-to-pin & 1-click pin */}
-      <div
-        className={`sidebar-section sidebar-pin-section ${pinZoneDragOver ? 'pin-drop-active' : ''}`}
-        onDragOver={(e) => {
-          if (e.dataTransfer.types.includes('application/x-velo-folder')) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'link';
-            setPinZoneDragOver(true);
-          }
-        }}
-        onDragLeave={() => setPinZoneDragOver(false)}
-        onDrop={handlePinZoneDrop}
-      >
-        <div className="sidebar-section-header">
-          <button
-            className="sidebar-section-toggle"
-            onClick={() => setPinnedExpanded((x) => !x)}
-          >
-            {pinnedExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-            <span>Pinned</span>
-            {pinnedPaths.length > 0 && (
-              <span className="sidebar-count">{pinnedPaths.length}</span>
-            )}
-          </button>
-          {canPinCurrent && !isCurrentPinned && (
-            <button
-              className="sidebar-pin-add"
-              onClick={() => onPinPath(currentPath)}
-              title={`Pin "${getPathBasename(currentPath)}" to sidebar`}
-            >
-              <Plus size={12} />
-              <span>Pin</span>
-            </button>
-          )}
-        </div>
-
-        {pinnedExpanded && (
-          <>
-            {pinnedPaths.length === 0 ? (
-              <div className="sidebar-pin-empty">
-                Drag a folder here or click <strong>+ Pin</strong>
-              </div>
-            ) : (
-              pinnedPaths.map((p, idx) => {
-                const isActive = normalize(p) === activeNorm;
-                const isDragOver = dragOverPath === p;
-                return (
-                  <div
-                    key={p}
-                    className={`sidebar-item pinned ${isActive ? 'active' : ''} ${
-                      isDragOver ? 'drop-target' : ''
-                    }`}
-                    onClick={() => onNavigate(p)}
-                    title={p}
-                    {...makeDropHandlers(p)}
-                  >
-                    <span className="sidebar-icon">
-                      <FluentFolderIcon size={15} />
-                    </span>
-                    <span className="sidebar-label">{getPathBasename(p)}</span>
-                    <div className="sidebar-pin-controls">
-                      {idx > 0 && (
-                        <button
-                          className="sidebar-mini-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onMovePin(p, -1);
-                          }}
-                          title="Move up"
-                        >
-                          <ArrowUp size={11} />
-                        </button>
-                      )}
-                      {idx < pinnedPaths.length - 1 && (
-                        <button
-                          className="sidebar-mini-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onMovePin(p, 1);
-                          }}
-                          title="Move down"
-                        >
-                          <ArrowDown size={11} />
-                        </button>
-                      )}
-                      <button
-                        className="sidebar-mini-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onUnpin(p);
-                        }}
-                        title="Unpin"
-                      >
-                        <PinOff size={11} />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Recent Folders (collapsible) */}
-      {recentPaths.length > 0 && (
+      {uiStyle !== 'classic-explorer' && (
         <>
           <div className="sidebar-sep" />
-          <div className="sidebar-section">
+
+          {/* Dedicated Pinned Folders section with drag-to-pin & 1-click pin */}
+          <div
+            className={`sidebar-section sidebar-pin-section ${pinZoneDragOver ? 'pin-drop-active' : ''}`}
+            {...pinZoneDropHandlers}
+          >
             <div className="sidebar-section-header">
               <button
                 className="sidebar-section-toggle"
-                onClick={() => setRecentExpanded((x) => !x)}
+                onClick={() => setPinnedExpanded((x) => !x)}
               >
-                {recentExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                <span>Recent</span>
+                {pinnedExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                <span>Pinned</span>
+                {pinnedPaths.length > 0 && (
+                  <span className="sidebar-count">{pinnedPaths.length}</span>
+                )}
               </button>
+              {canPinCurrent && !isCurrentPinned && (
+                <button
+                  className="sidebar-pin-add"
+                  onClick={() => onPinPath(currentPath)}
+                  title={`Pin "${getPathBasename(currentPath)}" to sidebar`}
+                >
+                  <Plus size={12} />
+                  <span>Pin</span>
+                </button>
+              )}
             </div>
-            {recentExpanded &&
-              recentPaths.slice(0, 6).map((p) => {
-                const isActive = normalize(p) === activeNorm;
-                return (
-                  <button
-                    key={p}
-                    className={`sidebar-item ${isActive ? 'active' : ''}`}
-                    onClick={() => onNavigate(p)}
-                    title={p}
-                  >
-                    <span className="sidebar-icon">
-                      <Clock size={13} style={{ color: '#a1a1aa' }} />
-                    </span>
-                    <span className="sidebar-label">{getPathBasename(p)}</span>
-                  </button>
-                );
-              })}
+
+            {pinnedExpanded && (
+              <>
+                {pinnedPaths.length === 0 ? (
+                  <div className="sidebar-pin-empty">
+                    Drag a folder here or click <strong>+ Pin</strong>
+                  </div>
+                ) : (
+                  pinnedPaths.map((p, idx) => {
+                    const isActive = normalize(p) === activeNorm;
+                    const isDragOver = dragOverPath === p;
+                    return (
+                      <div
+                        key={p}
+                        className={`sidebar-item pinned ${isActive ? 'active' : ''} ${
+                          isDragOver ? 'drop-target' : ''
+                        }`}
+                        onClick={() => onNavigate(p)}
+                        title={p}
+                        {...makeDropHandlers(p)}
+                      >
+                        <span className="sidebar-icon">
+                          <FluentFolderIcon size={15} />
+                        </span>
+                        <span className="sidebar-label">{getPathBasename(p)}</span>
+                        <div className="sidebar-pin-controls">
+                          {idx > 0 && (
+                            <button
+                              className="sidebar-mini-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onMovePin(p, -1);
+                              }}
+                              title="Move up"
+                            >
+                              <ArrowUp size={11} />
+                            </button>
+                          )}
+                          {idx < pinnedPaths.length - 1 && (
+                            <button
+                              className="sidebar-mini-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onMovePin(p, 1);
+                              }}
+                              title="Move down"
+                            >
+                              <ArrowDown size={11} />
+                            </button>
+                          )}
+                          <button
+                            className="sidebar-mini-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onUnpin(p);
+                            }}
+                            title="Unpin"
+                          >
+                            <PinOff size={11} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </>
+            )}
           </div>
+
+          {/* Recent Folders (collapsible) */}
+          {recentPaths.length > 0 && (
+            <>
+              <div className="sidebar-sep" />
+              <div className="sidebar-section">
+                <div className="sidebar-section-header">
+                  <button
+                    className="sidebar-section-toggle"
+                    onClick={() => setRecentExpanded((x) => !x)}
+                  >
+                    {recentExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                    <span>Recent</span>
+                  </button>
+                </div>
+                {recentExpanded &&
+                  recentPaths.slice(0, 6).map((p) => {
+                    const isActive = normalize(p) === activeNorm;
+                    return (
+                      <button
+                        key={p}
+                        className={`sidebar-item ${isActive ? 'active' : ''}`}
+                        onClick={() => onNavigate(p)}
+                        title={p}
+                      >
+                        <span className="sidebar-icon">
+                          <Clock size={13} style={{ color: '#a1a1aa' }} />
+                        </span>
+                        <span className="sidebar-label">{getPathBasename(p)}</span>
+                      </button>
+                    );
+                  })}
+              </div>
+            </>
+          )}
         </>
       )}
 
@@ -380,12 +429,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </span>
                   <span className="sidebar-label">{drive.name}</span>
                 </div>
-                <div className="drive-bar-track">
-                  <div
-                    className={`drive-bar-fill ${pct > 88 ? 'warn' : ''}`}
-                    style={{ width: `${pct.toFixed(1)}%` }}
-                  />
-                </div>
+                {uiStyle !== 'classic-explorer' && (
+                  <div className="drive-bar-track">
+                    <div
+                      className={`drive-bar-fill ${pct > 88 ? 'warn' : ''}`}
+                      style={{ width: `${pct.toFixed(1)}%` }}
+                    />
+                  </div>
+                )}
               </button>
             );
           })}

@@ -44,6 +44,7 @@ const RECENT_STORAGE_KEY = 'velo.recentPaths.v1';
 const SETTINGS_STORAGE_KEY = 'velo.userSettings.v1';
 
 const DEFAULT_SETTINGS: UserSettings = {
+  uiStyle: 'folio',
   glassOpacity: 0.15,
   showExtensions: true,
   doubleClickEmptyGoesBack: true,
@@ -498,17 +499,20 @@ export const App: React.FC = () => {
   );
 
   // Filter & sort entries
-  const filterAndSort = useCallback((entries: FileEntry[], tab: TabState) => {
-    let list = entries;
-    if (tab.categoryFilter !== 'all') {
-      list = list.filter((e) => e.category === tab.categoryFilter);
-    }
-    if (!tab.recursiveSearch && tab.filter.trim()) {
-      const q = tab.filter.trim().toLowerCase();
-      list = list.filter((e) => e.name.toLowerCase().includes(q));
-    }
-    return sortEntries(list, tab.sortField, tab.sortDir);
-  }, []);
+  const filterAndSort = useCallback(
+    (entries: FileEntry[], tab: TabState) => {
+      let list = entries;
+      if (userSettings.uiStyle !== 'classic-explorer' && tab.categoryFilter !== 'all') {
+        list = list.filter((e) => e.category === tab.categoryFilter);
+      }
+      if (!tab.recursiveSearch && tab.filter.trim()) {
+        const q = tab.filter.trim().toLowerCase();
+        list = list.filter((e) => e.name.toLowerCase().includes(q));
+      }
+      return sortEntries(list, tab.sortField, tab.sortDir);
+    },
+    [userSettings.uiStyle]
+  );
 
   const visiblePrimary = useMemo(
     () => filterAndSort(primaryEntries, primaryTab),
@@ -817,13 +821,52 @@ export const App: React.FC = () => {
     api.setWindowEffect(next).catch(() => {});
   }, []);
 
-  const handleUpdateSettings = useCallback((patch: Partial<UserSettings>) => {
+  const resetClassicIncompatibleTabFilters = useCallback(() => {
+    setTabs((prev) =>
+      prev.map((t) =>
+        t.categoryFilter !== 'all' || t.recursiveSearch
+          ? { ...t, categoryFilter: 'all', recursiveSearch: false }
+          : t
+      )
+    );
+    setSecondaryTab((prev) =>
+      prev.categoryFilter !== 'all' || prev.recursiveSearch
+        ? { ...prev, categoryFilter: 'all', recursiveSearch: false }
+        : prev
+    );
+  }, []);
+
+  const handleUpdateSettings = useCallback(
+    (patch: Partial<UserSettings>) => {
+      if (patch.uiStyle === 'classic-explorer') {
+        resetClassicIncompatibleTabFilters();
+      }
+      setUserSettings((prev) => {
+        const next = { ...prev, ...patch };
+        localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(next));
+        return next;
+      });
+    },
+    [resetClassicIncompatibleTabFilters]
+  );
+
+  const handleToggleUiStyle = useCallback(() => {
     setUserSettings((prev) => {
-      const next = { ...prev, ...patch };
+      const nextStyle: UserSettings['uiStyle'] =
+        prev.uiStyle === 'classic-explorer' ? 'folio' : 'classic-explorer';
+      if (nextStyle === 'classic-explorer') {
+        resetClassicIncompatibleTabFilters();
+      }
+      const next: UserSettings = { ...prev, uiStyle: nextStyle };
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(next));
+      showToast(
+        nextStyle === 'classic-explorer'
+          ? 'Switched to Original Windows 11 Explorer UI'
+          : 'Switched to Folio Modern UI'
+      );
       return next;
     });
-  }, []);
+  }, [showToast, resetClassicIncompatibleTabFilters]);
 
   const handleCycleEffect = useCallback(() => {
     const order: WindowEffect[] = ['acrylic', 'mica', 'tabbed', 'solid'];
@@ -1283,7 +1326,9 @@ export const App: React.FC = () => {
         pinnedSet={pinnedSet}
         fileTags={fileTags}
         showExtensions={userSettings.showExtensions}
-        showHoverActions={userSettings.showHoverActions}
+        showHoverActions={
+          userSettings.showHoverActions && userSettings.uiStyle !== 'classic-explorer'
+        }
         filterKey={primaryFilterKey}
         onActivatePane={() => setActivePane('primary')}
         onSelect={(sel) => setPrimarySelected(sel)}
@@ -1307,7 +1352,9 @@ export const App: React.FC = () => {
 
   return (
     <div
-      className={`app-shell effect-${windowEffect} ${appReady ? 'app-ready' : 'app-booting'}`}
+      className={`app-shell style-${userSettings.uiStyle} effect-${windowEffect} ${
+        appReady ? 'app-ready' : 'app-booting'
+      }`}
       style={
         windowEffect !== 'solid'
           ? ({ '--glass-alpha': String(userSettings.glassOpacity) } as React.CSSProperties)
@@ -1326,6 +1373,7 @@ export const App: React.FC = () => {
       />
 
       <Toolbar
+        uiStyle={userSettings.uiStyle}
         path={currentTab.path}
         canBack={currentTab.historyIndex > 0}
         canForward={currentTab.historyIndex < currentTab.history.length - 1}
@@ -1349,6 +1397,7 @@ export const App: React.FC = () => {
       />
 
       <CommandBar
+        uiStyle={userSettings.uiStyle}
         hasSelection={activeSelected.size > 0}
         singleSelection={activeSelected.size === 1}
         canPaste={Boolean(clipboard && clipboard.paths.length > 0)}
@@ -1390,6 +1439,7 @@ export const App: React.FC = () => {
         onOpenTerminal={() => api.openInTerminal(currentTab.path).catch((e) => showToast(String(e)))}
         onOpenProperties={() => primarySelectedEntry && handleProperties(primarySelectedEntry.path)}
         onOpenTidy={() => setTidyOpen(true)}
+        onToggleUiStyle={handleToggleUiStyle}
       />
 
       <SettingsPopover
@@ -1406,6 +1456,7 @@ export const App: React.FC = () => {
 
       <div className="workspace">
         <Sidebar
+          uiStyle={userSettings.uiStyle}
           currentPath={currentTab.path}
           quickAccess={quickAccess}
           pinnedPaths={pinnedPaths}
@@ -1422,7 +1473,7 @@ export const App: React.FC = () => {
         />
 
         <main className="main-area">
-          {!isVirtualPath(currentTab.path) && (
+          {!isVirtualPath(currentTab.path) && userSettings.uiStyle !== 'classic-explorer' && (
             <CategoryBar
               entries={activeEntries}
               activeCategory={currentTab.categoryFilter}
@@ -1456,7 +1507,9 @@ export const App: React.FC = () => {
                 pinnedSet={pinnedSet}
                 fileTags={fileTags}
                 showExtensions={userSettings.showExtensions}
-                showHoverActions={userSettings.showHoverActions}
+                showHoverActions={
+                  userSettings.showHoverActions && userSettings.uiStyle !== 'classic-explorer'
+                }
                 filterKey={secondaryFilterKey}
                 onActivatePane={() => setActivePane('secondary')}
                 onSelect={(sel) => setSecondarySelected(sel)}
@@ -1478,9 +1531,11 @@ export const App: React.FC = () => {
             )}
           </div>
 
-          {/* Intuitive Floating Multi-Select Action Bar */}
-          {activeSelected.size >= 2 && !isVirtualPath(currentTab.path) && (
-            <div className="multi-select-bar">
+          {/* Intuitive Floating Multi-Select Action Bar (Folio Modern UI) */}
+          {activeSelected.size >= 2 &&
+            !isVirtualPath(currentTab.path) &&
+            userSettings.uiStyle !== 'classic-explorer' && (
+              <div className="multi-select-bar">
               <span className="msb-count">{activeSelected.size} selected</span>
               <div className="msb-sep" />
               <button className="msb-btn" onClick={handleCopy} title="Copy">
@@ -1537,6 +1592,7 @@ export const App: React.FC = () => {
       </div>
 
       <StatusBar
+        uiStyle={userSettings.uiStyle}
         totalCount={activeEntries.length}
         visibleCount={activeVisible.length}
         selectedCount={activeSelected.size}
@@ -1627,6 +1683,7 @@ export const App: React.FC = () => {
 
       <CommandPalette
         open={paletteOpen}
+        uiStyle={userSettings.uiStyle}
         onClose={() => setPaletteOpen(false)}
         quickAccess={quickAccess}
         drives={drives}
@@ -1636,6 +1693,7 @@ export const App: React.FC = () => {
         onToggleSplit={() => setSplitPane((s) => !s)}
         onTogglePreview={() => setPreviewPane((p) => !p)}
         onCycleEffect={handleCycleEffect}
+        onToggleUiStyle={handleToggleUiStyle}
         onOpenTerminal={() => api.openInTerminal(currentTab.path).catch((e) => showToast(String(e)))}
         onOpenTidy={() => setTidyOpen(true)}
       />

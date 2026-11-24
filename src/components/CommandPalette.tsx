@@ -4,12 +4,13 @@ import {
   Folder,
   FolderPlus,
   HardDrive,
+  Layout,
   PanelRight,
   Search,
   Sparkles,
   Terminal,
 } from 'lucide-react';
-import type { DriveInfo, QuickAccessItem } from '../types';
+import type { DriveInfo, QuickAccessItem, UiStyle } from '../types';
 
 export interface PaletteAction {
   id: string;
@@ -21,6 +22,7 @@ export interface PaletteAction {
 
 interface CommandPaletteProps {
   open: boolean;
+  uiStyle: UiStyle;
   onClose: () => void;
   quickAccess: QuickAccessItem[];
   drives: DriveInfo[];
@@ -30,12 +32,14 @@ interface CommandPaletteProps {
   onToggleSplit: () => void;
   onTogglePreview: () => void;
   onCycleEffect: () => void;
+  onToggleUiStyle: () => void;
   onOpenTerminal: () => void;
   onOpenTidy: () => void;
 }
 
 export const CommandPalette: React.FC<CommandPaletteProps> = ({
   open,
+  uiStyle,
   onClose,
   quickAccess,
   drives,
@@ -45,6 +49,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   onToggleSplit,
   onTogglePreview,
   onCycleEffect,
+  onToggleUiStyle,
   onOpenTerminal,
   onOpenTidy,
 }) => {
@@ -89,6 +94,16 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         subtitle: 'Alt+P',
         icon: <PanelRight size={15} />,
         run: onTogglePreview,
+      },
+      {
+        id: 'act-ui-style',
+        label:
+          uiStyle === 'classic-explorer'
+            ? 'Switch to Folio Modern Interface'
+            : 'Switch to Original Windows 11 Explorer Interface',
+        subtitle: 'Toggle exact Windows 11 File Explorer aesthetics & layout',
+        icon: <Layout size={15} />,
+        run: onToggleUiStyle,
       },
       {
         id: 'act-effect',
@@ -146,6 +161,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
     onToggleSplit,
     onTogglePreview,
     onCycleEffect,
+    onToggleUiStyle,
+    uiStyle,
     onOpenTerminal,
     onOpenTidy,
   ]);

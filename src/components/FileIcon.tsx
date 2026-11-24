@@ -22,7 +22,7 @@ interface FileIconProps {
   className?: string;
 }
 
-/** Crisp Windows 11 Fluent filled folder icon */
+/** Crisp Windows 11 Fluent filled folder icon (supports Folio cool slate & Classic Explorer warm gold via CSS vars) */
 export const FluentFolderIcon: React.FC<{ size?: number; className?: string }> = ({
   size = 18,
   className = '',
@@ -39,7 +39,7 @@ export const FluentFolderIcon: React.FC<{ size?: number; className?: string }> =
     >
       <path
         d="M2.5 6.25C2.5 5.00736 3.50736 4 4.75 4H9.17157C9.70201 4 10.2107 4.21071 10.5858 4.58579L12 6H19.25C20.4926 6 21.5 7.00736 21.5 8.25V17.75C21.5 18.9926 20.4926 20 19.25 20H4.75C3.50736 20 2.5 18.9926 2.5 17.75V6.25Z"
-        fill="#4A607A"
+        style={{ fill: 'var(--folder-back, #4A607A)' }}
       />
       <path
         d="M2.5 8.75C2.5 7.7835 3.2835 7 4.25 7H19.75C20.7165 7 21.5 7.7835 21.5 8.75V17.75C21.5 18.9926 20.4926 20 19.25 20H4.75C3.50736 20 2.5 18.9926 2.5 17.75V8.75Z"
@@ -47,8 +47,8 @@ export const FluentFolderIcon: React.FC<{ size?: number; className?: string }> =
       />
       <defs>
         <linearGradient id={gradId} x1="12" y1="7" x2="12" y2="20" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#AFCBE6" />
-          <stop offset="1" stopColor="#7295BA" />
+          <stop style={{ stopColor: 'var(--folder-front-top, #AFCBE6)' }} />
+          <stop offset="1" style={{ stopColor: 'var(--folder-front-bottom, #7295BA)' }} />
         </linearGradient>
       </defs>
     </svg>

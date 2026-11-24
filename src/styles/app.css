@@ -3479,3 +3479,231 @@ button {
   color: var(--text-muted);
   margin-top: 4px;
 }
+
+.settings-style-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* =========================================================================
+   AUTHENTIC WINDOWS 11 FILE EXPLORER UI MODE (.style-classic-explorer)
+   Matches original Windows 11 File Explorer & Browser Upload/Save dialogs
+   ========================================================================= */
+
+:root {
+  --folder-back: #4A607A;
+  --folder-front-top: #AFCBE6;
+  --folder-front-bottom: #7295BA;
+}
+
+.app-shell.style-classic-explorer {
+  --text-primary: rgba(255, 255, 255, 0.96);
+  --text-secondary: rgba(255, 255, 255, 0.72);
+  --text-muted: rgba(255, 255, 255, 0.48);
+
+  --accent: #60cdff;
+  --accent-indicator: #60cdff;
+  --accent-soft: rgba(96, 205, 255, 0.14);
+  --accent-border: rgba(96, 205, 255, 0.58);
+
+  --border: rgba(255, 255, 255, 0.075);
+  --border-strong: rgba(255, 255, 255, 0.15);
+  --surface-1: rgba(255, 255, 255, 0.035);
+  --surface-2: rgba(255, 255, 255, 0.06);
+  --surface-hover: rgba(255, 255, 255, 0.065);
+  --surface-active: rgba(255, 255, 255, 0.095);
+  --surface-elevated: rgba(28, 28, 28, 0.96);
+
+  /* Authentic Windows 11 warm-gold folder icon colors */
+  --folder-back: #D99016;
+  --folder-front-top: #FFE270;
+  --folder-front-bottom: #F6B922;
+
+  border-color: rgba(255, 255, 255, 0.11);
+}
+
+.app-shell.style-classic-explorer.effect-acrylic {
+  background: rgba(20, 20, 20, var(--glass-alpha));
+}
+.app-shell.style-classic-explorer.effect-mica {
+  background: rgba(20, 20, 20, calc(var(--glass-alpha) * 0.75));
+}
+.app-shell.style-classic-explorer.effect-tabbed {
+  background: rgba(20, 20, 20, calc(var(--glass-alpha) * 0.88));
+}
+.app-shell.style-classic-explorer.effect-solid {
+  background: #191919;
+}
+
+/* Classic Windows 11 Tab Bar — Active tab merges directly into the address bar row */
+.app-shell.style-classic-explorer .titlebar {
+  height: 38px;
+  background: transparent;
+  border-bottom: none;
+  padding-left: 8px;
+}
+
+.app-shell.style-classic-explorer .tabs-strip {
+  padding: 6px 0 0;
+  gap: 2px;
+}
+
+.app-shell.style-classic-explorer .tab-item {
+  height: 32px;
+  min-width: 145px;
+  max-width: 240px;
+  border-radius: 8px 8px 0 0;
+  border: 1px solid transparent;
+  border-bottom: none;
+  padding: 0 9px 0 12px;
+}
+
+.app-shell.style-classic-explorer .tab-item.active {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.app-shell.style-classic-explorer .tab-add {
+  margin-bottom: 3px;
+}
+
+/* Classic Windows 11 Address Bar Toolbar Row */
+.app-shell.style-classic-explorer .toolbar {
+  height: 44px;
+  background: rgba(255, 255, 255, 0.06);
+  border-top: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.app-shell.style-classic-explorer .address-bar,
+.app-shell.style-classic-explorer .search-box {
+  height: 32px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.app-shell.style-classic-explorer .address-bar:hover {
+  background: rgba(0, 0, 0, 0.32);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.app-shell.style-classic-explorer .address-bar.editing,
+.app-shell.style-classic-explorer .search-box:focus-within {
+  background: rgba(0, 0, 0, 0.52);
+  border-color: rgba(255, 255, 255, 0.18);
+  border-bottom: 2px solid #60cdff;
+}
+
+/* Classic Windows 11 Command Bar */
+.app-shell.style-classic-explorer .command-bar {
+  height: 44px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.075);
+}
+
+.app-shell.style-classic-explorer .cmd-new-icon {
+  color: #60cdff;
+}
+
+/* Classic Windows 11 Navigation Pane */
+.app-shell.style-classic-explorer .sidebar {
+  width: 214px;
+  background: transparent;
+  border-right: 1px solid rgba(255, 255, 255, 0.075);
+  padding: 8px 6px;
+  gap: 6px;
+}
+
+.app-shell.style-classic-explorer .sidebar-item {
+  height: 30px;
+  border-radius: 4px;
+  padding: 0 10px;
+}
+
+.app-shell.style-classic-explorer .sidebar-item.active {
+  background: rgba(255, 255, 255, 0.085);
+}
+
+.app-shell.style-classic-explorer .sidebar-item.active::before {
+  background: #60cdff;
+  top: 7px;
+  bottom: 7px;
+}
+
+.app-shell.style-classic-explorer .sidebar-drive.tree-child {
+  padding: 5px 10px 5px 28px;
+  border-radius: 4px;
+}
+
+.app-shell.style-classic-explorer .sidebar-pin-mark {
+  opacity: 0.65;
+  cursor: pointer;
+}
+.app-shell.style-classic-explorer .sidebar-pin-mark:hover {
+  opacity: 1;
+  color: #60cdff;
+}
+
+.app-shell.style-classic-explorer .sidebar-section.pin-drop-active {
+  background: rgba(96, 205, 255, 0.1);
+  outline: 1px dashed rgba(96, 205, 255, 0.55);
+  border-radius: 6px;
+}
+
+/* Classic Windows 11 Details View Table & Selection */
+.app-shell.style-classic-explorer .list-header {
+  height: 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.075);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+}
+
+.app-shell.style-classic-explorer .list-header > button {
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  padding-left: 6px;
+  padding-right: 8px;
+}
+
+.app-shell.style-classic-explorer .list-header > button:last-child {
+  border-right: none;
+}
+
+.app-shell.style-classic-explorer .file-row,
+.app-shell.style-classic-explorer .grid-card {
+  border-radius: 3px;
+}
+
+.app-shell.style-classic-explorer .file-row:hover,
+.app-shell.style-classic-explorer .grid-card:hover {
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.app-shell.style-classic-explorer .file-row.selected,
+.app-shell.style-classic-explorer .grid-card.selected {
+  background: rgba(255, 255, 255, 0.085);
+  border-color: #60cdff;
+}
+
+.app-shell.style-classic-explorer .grid-thumb-wrap {
+  background: transparent;
+}
+
+.app-shell.style-classic-explorer .grid-ext-badge {
+  display: none;
+}
+
+.app-shell.style-classic-explorer .row-checkbox {
+  border-radius: 3px;
+}
+
+/* Classic Windows 11 Status Bar */
+.app-shell.style-classic-explorer .statusbar {
+  height: 26px;
+  background: rgba(0, 0, 0, 0.22);
+  border-top: 1px solid rgba(255, 255, 255, 0.075);
+  color: rgba(255, 255, 255, 0.72);
+}
+

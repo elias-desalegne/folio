@@ -10,11 +10,13 @@ import {
   Search,
   X,
 } from 'lucide-react';
+import type { UiStyle } from '../types';
 import { api } from '../api';
 import { getPathBasename, getPathBreadcrumbs, joinWinPath } from '../utils/format';
 import { FluentFolderIcon } from './FileIcon';
 
 interface ToolbarProps {
+  uiStyle: UiStyle;
   path: string;
   canBack: boolean;
   canForward: boolean;
@@ -36,6 +38,7 @@ interface ToolbarProps {
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
+  uiStyle,
   path,
   canBack,
   canForward,
@@ -219,7 +222,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               ))}
             </div>
 
-            {!isVirtual && (
+            {!isVirtual && uiStyle !== 'classic-explorer' && (
               <button
                 className={`addr-pin-btn ${isCurrentPinned ? 'pinned' : ''}`}
                 onClick={(e) => {
@@ -293,13 +296,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <X size={13} />
           </button>
         )}
-        <button
-          className={`search-mode-pill ${recursiveSearch ? 'active' : ''}`}
-          onClick={onToggleRecursiveSearch}
-          title="Toggle deep recursive search across subfolders (Ctrl+Shift+F)"
-        >
-          Deep
-        </button>
+        {uiStyle !== 'classic-explorer' && (
+          <button
+            className={`search-mode-pill ${recursiveSearch ? 'active' : ''}`}
+            onClick={onToggleRecursiveSearch}
+            title="Toggle deep recursive search across subfolders (Ctrl+Shift+F)"
+          >
+            Deep
+          </button>
+        )}
         <Search size={14} className={`search-icon ${searching ? 'spin' : ''}`} />
       </div>
     </div>

@@ -83,6 +83,11 @@ export const SpecialViews: React.FC<SpecialViewsProps> = ({
     );
   }
 
+  const normalize = (p: string) => p.replace(/[\\/]+$/, '').toLowerCase();
+  const quickFolders = quickAccess.filter((q) => q.name !== 'Home');
+  const quickNorms = new Set(quickFolders.map((q) => normalize(q.path)));
+  const extraPinned = pinnedPaths.filter((p) => !quickNorms.has(normalize(p)));
+
   return (
     <div className="file-pane active-pane">
       <div className="file-scroll special-scroll">
@@ -91,24 +96,22 @@ export const SpecialViews: React.FC<SpecialViewsProps> = ({
             <>
               <div className="special-section-title">Quick Access</div>
               <div className="special-folder-grid">
-                {quickAccess
-                  .filter((q) => q.name !== 'Home')
-                  .map((q) => (
-                    <button
-                      key={q.path}
-                      className="special-folder-card"
-                      onClick={() => onNavigate(q.path, 'in')}
-                    >
-                      <FluentFolderIcon size={36} />
-                      <div className="special-card-info">
-                        <div className="special-card-name">{q.name}</div>
-                        <div className="special-card-sub">{q.path}</div>
-                      </div>
-                    </button>
-                  ))}
-                {pinnedPaths.map((p) => (
+                {quickFolders.map((q) => (
                   <button
-                    key={p}
+                    key={q.path}
+                    className="special-folder-card"
+                    onClick={() => onNavigate(q.path, 'in')}
+                  >
+                    <FluentFolderIcon size={36} />
+                    <div className="special-card-info">
+                      <div className="special-card-name">{q.name}</div>
+                      <div className="special-card-sub">{q.path}</div>
+                    </div>
+                  </button>
+                ))}
+                {extraPinned.map((p) => (
+                  <button
+                    key={`pin-${normalize(p)}`}
                     className="special-folder-card"
                     onClick={() => onNavigate(p, 'in')}
                   >
